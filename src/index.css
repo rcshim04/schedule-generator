@@ -1,0 +1,30 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --sky-blue: #D4F1F9;
+    --seafoam: #CFF5E7;
+    --light-beige: #F9E8D9;
+    --warm-sand: #F3D6BA;
+    --dark-gray: #4A4A4A;
+    --light-gray: #B0B0B0;
+    --pastel-green: #B7E4C7;
+    --periwinkle: #AEB8FF;
+    --lilac: #D8B4F8;
+
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    width: 100%;
+    height: 100%;
+    background-color: var(--sky-blue);
+    color: var(--dark-gray);
+}
+
+.material-symbols-rounded {
+    font-size: inherit !important;
+}
