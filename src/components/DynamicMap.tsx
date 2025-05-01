@@ -96,6 +96,13 @@ export function DynamicMap({ buildingMarkers }: DynamicMapProps) {
                         title={marker.code}
                         key={marker.code}
                     >
+                        <span
+                            style={{
+                                color: marker.color,
+                            }}
+                        >
+                            {marker.code.toLowerCase()}
+                        </span>
                     </div>
                 );
             })}

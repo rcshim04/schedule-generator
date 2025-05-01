@@ -52,7 +52,7 @@ export function App() {
                     type="text"
                     placeholder={defaultTitle()}
                     value={scheduleTitle}
-                    onInput={(e) => setScheduleTitle((e.target as HTMLInputElement).value)}
+                    onInput={(e) => setScheduleTitle((e.target as HTMLInputElement).value.toLowerCase())}
                 />
             </div>
             <div id="schedule-inputs">

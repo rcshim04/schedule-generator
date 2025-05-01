@@ -102,6 +102,13 @@
     border-radius: 50%;
     border: 3px solid darkslategray;
 }
+.building-marker span {
+    position: absolute;
+    top: -16px;
+    left: 16px;
+    font-size: 18px;
+    font-weight: 600;
+}
 
 #schedule-body {
     display: flex;

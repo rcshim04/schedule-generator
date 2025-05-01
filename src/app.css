@@ -49,6 +49,9 @@ button:hover {
 }
 
 input, textarea, select {
+    appearance: none;
+    -webkit-appearance: none;
+    font-family: inherit;
     background-color: white;
     border: 2px solid var(--pastel-green);
     border-radius: var(--radius);

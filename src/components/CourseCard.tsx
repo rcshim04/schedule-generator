@@ -43,6 +43,8 @@ export function CourseCard({ course, onUpdate, onDelete}: CourseCardProps) {
                 <input
                     type="text"
                     placeholder="e.g. syde 381"
+                    minlength={2}
+                    maxlength={16}
                     value={course.name}
                     onInput={handleNameChange}
                     required
@@ -79,6 +81,8 @@ export function CourseCard({ course, onUpdate, onDelete}: CourseCardProps) {
                                 <input
                                     type="text"
                                     placeholder="e.g. e7 4417"
+                                    minlength={2}
+                                    maxlength={10}
                                     value={session.room}
                                     onInput={(e) => handleSessionChange(index, 'room', (e.target as HTMLSelectElement).value)}
                                     required
