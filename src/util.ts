@@ -95,7 +95,7 @@ export const generateColorPalette = (courseName: string, sessionType: SessionTyp
     const saturation = 70;
 
     if (isTooSimilar(termBackgrounds[term()], { h: hue, s: saturation, l: 80 })) {
-        hue = (hue + 180) % 360;
+        hue = (hue + 120) % 360;
     }
 
     const background = `hsl(${hue}, ${saturation}%, ${baseLightness}%)`;
