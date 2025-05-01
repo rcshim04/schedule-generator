@@ -101,6 +101,7 @@
     height: 16px;
     border-radius: 50%;
     border: 3px solid darkslategray;
+    box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.4);
 }
 .building-marker span {
     position: absolute;
@@ -108,6 +109,7 @@
     left: 16px;
     font-size: 18px;
     font-weight: 600;
+    text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.4);
 }
 
 #schedule-body {
