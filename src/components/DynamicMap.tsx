@@ -21,27 +21,52 @@ export function DynamicMap({ buildingMarkers }: DynamicMapProps) {
         const leftMin = Math.min( ...buildingMarkers.map(b => b.left));
         const leftMax = Math.max( ...buildingMarkers.map(b => b.left));
 
-        const croppedTop = Math.max(0, topMin - 10);
-        const croppedBottom = Math.min(100, topMax + 10);
-        const croppedLeft = Math.max(0, leftMin - 10);
-        const croppedRight = Math.min(100, leftMax + 10);
+        const initialTop = Math.max(0, topMin - 10);
+        const initialBottom = Math.min(100, topMax + 10);
+        const initialLeft = Math.max(0, leftMin - 10);
+        const initialRight = Math.min(100, leftMax + 10);
 
-        const verticalRange = croppedBottom - croppedTop;
-        const horizontalRange = croppedRight - croppedLeft;
+        const verticalRange = initialBottom - initialTop;
+        const horizontalRange = initialRight - initialLeft;
 
-        const containerHeightPx = 320;
-        const maxContainerWidthPx = 600;
+        const imageSize = 1000;
+        const baseContainerHeightPx = 320;
+        const minContainerWidthPx = 320;
+        const maxContainerWidthPx = 640;
 
         const visibleVerticalPixels = (verticalRange / 100) * 1000;
         const visibleHorizontalPixels = (horizontalRange / 100) * 1000;
 
-        let scale = containerHeightPx / visibleVerticalPixels;
+        let scale = baseContainerHeightPx / visibleVerticalPixels;
         let containerWidth = visibleHorizontalPixels * scale;
+        let containerHeight = baseContainerHeightPx;
+
+        if (containerWidth < minContainerWidthPx) {
+            containerWidth = minContainerWidthPx;
+        }
 
         if (containerWidth > maxContainerWidthPx) {
             scale = maxContainerWidthPx / visibleHorizontalPixels;
             containerWidth = maxContainerWidthPx;
         }
+
+        const pixelsPerPercent = (imageSize / 100) * scale;
+
+        const scaledWidth = visibleHorizontalPixels * scale;
+        const centerShiftPercentX = (containerWidth - scaledWidth) / (2 * pixelsPerPercent);
+        const scaledHorizontalRange = containerWidth / pixelsPerPercent;
+
+        let croppedLeft = initialLeft - centerShiftPercentX;
+        const maxLeft = 100 - scaledHorizontalRange;
+        croppedLeft = Math.max(0, Math.min(maxLeft, croppedLeft));
+
+        const scaledHeight = visibleVerticalPixels * scale;
+        const centerShiftPercentY = (containerHeight - scaledHeight) / (2 * pixelsPerPercent);
+        const scaledVerticalRange = containerHeight / pixelsPerPercent;
+
+        let croppedTop = initialTop - centerShiftPercentY;
+        const maxTop = 100 - scaledVerticalRange;
+        croppedTop = Math.max(0, Math.min(maxTop, croppedTop));
 
         return {
             croppedTop,
