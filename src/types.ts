@@ -4,6 +4,7 @@ export type TermSeason = 'winter' | 'spring' | 'fall';
 export type BuildingCode = 'AL' | 'B1' | 'B2' | 'BMH' | 'C2' | 'CGR' | 'CPH' | 'DC' | 'DWE' | 'E2' | 'E3' | 'E5' | 'E6' | 'ECH' | 'EIT' | 'ESC' | 'EV1' | 'EV2' | 'EV3' | 'EXP' | 'HH' | 'LHI' | 'LIB' | 'M3' | 'MC' | 'ML' | 'NH' | 'PAC' | 'PAS' | 'PHY' | 'PSE' | 'QNC' | 'RCH' | 'REN' | 'SCH' | 'SLC' | 'STC' | 'STJ' | 'UTD';
 
 export interface Session {
+    meetingId: string;
     day: DayOfWeek;
     startTime: string;
     endTime: string;

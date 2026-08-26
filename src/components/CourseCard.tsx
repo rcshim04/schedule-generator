@@ -21,7 +21,7 @@ interface SessionGroup {
 const groupSessions = (sessions: Session[]): SessionGroup[] => {
     const groups = new Map<string, SessionGroup>();
     sessions.forEach((session, index) => {
-        const key = [session.type, session.room, session.startTime, session.endTime, session.name].join('|');
+        const key = session.meetingId;
         const existing = groups.get(key);
         if (existing) {
             existing.indices.push(index);
@@ -64,6 +64,7 @@ export function CourseCard({ course, onUpdate, onDelete}: CourseCardProps) {
         onUpdate({
             ...course,
             sessions: [...course.sessions, {
+                meetingId: crypto.randomUUID(),
                 day: 'mon', startTime: '', endTime: '', room: '', type: 'lec', name: course.name,
             }],
         });
@@ -82,7 +83,7 @@ export function CourseCard({ course, onUpdate, onDelete}: CourseCardProps) {
             </div>
             <div class="session-container">
                 {groupSessions(course.sessions).map((group) => (
-                    <div class="session" key={group.indices[0]}>
+                    <div class="session" key={group.session.meetingId}>
                         <div class="session-inputs">
                             <div class="input-wrapper">
                                 <label>type</label>
