@@ -8,7 +8,7 @@ interface CourseCardProps {
 
 const DAYS: DayOfWeek[] = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 const DAY_LABELS: Record<DayOfWeek, string> = {
-    mon: 'M', tue: 'T', wed: 'W', thu: 'Th', fri: 'F', sat: 'Sa', sun: 'Su',
+    mon: 'M', tue: 'T', wed: 'W', thu: 'Th', fri: 'F', sat: 'S', sun: 'Su',
 };
 const TYPES: SessionType[] = ['lec', 'tut', 'lab', 'sem', 'prj'];
 
