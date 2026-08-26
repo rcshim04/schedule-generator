@@ -130,6 +130,34 @@ input, select, button {
     gap: 0.5rem;
     justify-content: space-between;
 }
+.day-selector {
+    height: 3rem;
+    display: flex;
+    overflow: hidden;
+    background-color: white;
+    border: 2px solid var(--pastel-green);
+    border-radius: var(--radius);
+    box-shadow: var(--small-shadow);
+}
+.day-selector button {
+    min-width: 2rem;
+    height: 100%;
+    flex: 1;
+    padding: 0 0.35rem;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    font-size: 0.9rem;
+}
+.day-selector button:hover {
+    background-color: var(--light-beige);
+    box-shadow: none;
+    transform: none;
+}
+.day-selector button.selected {
+    background-color: var(--periwinkle);
+    color: #282d5f;
+}
 .input-wrapper {
     width: 100%;
     display: flex;

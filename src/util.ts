@@ -88,9 +88,14 @@ export const generateColorPalette = (courseName: string, sessionType: SessionTyp
     }
     let hue = Math.abs(hash) % 360;
 
-    let baseLightness = 90;
-    if (sessionType === 'lec') baseLightness = 80;
-    if (sessionType === 'lab') baseLightness = 70;
+    const lightnessByType: Record<SessionType, number> = {
+        tut: 90,
+        sem: 90,
+        lec: 80,
+        prj: 80,
+        lab: 70,
+    };
+    const baseLightness = lightnessByType[sessionType];
 
     const saturation = 70;
 
@@ -264,12 +269,6 @@ export const buildingLookup: BuildingLookup = {
         left: 91,
         top: 22,
     },
-    'E7': {
-        code: 'E7',
-        color: '#DB7070',
-        left: 84,
-        top: 21,
-    },
     'ECH': {
         code: 'ECH',
         color: '#DBA270',
@@ -371,6 +370,12 @@ export const buildingLookup: BuildingLookup = {
         color: '#B7EBAD',
         left: 68,
         top: 45,
+    },
+    'PSE': {
+        code: 'PSE',
+        color: '#DB7070',
+        left: 84,
+        top: 21,
     },
     'QNC': {
         code: 'QNC',

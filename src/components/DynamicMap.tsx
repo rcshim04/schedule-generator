@@ -9,6 +9,125 @@ interface DynamicMapProps {
     buildingMarkers: BuildingMarker[];
 }
 
+interface LabelPlacement {
+    left: number;
+    top: number;
+}
+
+interface Rectangle extends LabelPlacement {
+    width: number;
+    height: number;
+}
+
+const LABEL_HEIGHT = 24;
+const LABEL_GAP = 2;
+const PIN_RADIUS = 11;
+const labelWidthCache = new Map<string, number>();
+
+const labelWidth = (code: string) => {
+    const cachedWidth = labelWidthCache.get(code);
+    if (cachedWidth) return cachedWidth;
+
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    context!.font = '600 18px Poppins';
+    const width = Math.ceil(context!.measureText(code.toLowerCase()).width);
+    labelWidthCache.set(code, width);
+    return width;
+};
+
+const readableLabelColor = (hexColor: string) => {
+    const channels = hexColor
+        .replace('#', '')
+        .match(/.{2}/g)
+        ?.map(channel => Number.parseInt(channel, 16));
+
+    if (!channels || channels.some(Number.isNaN)) return '#263238';
+
+    // Keep the assigned hue recognizable, but blend it toward a dark neutral so
+    // even the pale building colors remain legible on the light campus maps.
+    const darkNeutral = [25, 32, 38];
+    const darkened = channels.map((channel, index) =>
+        Math.round(channel * 0.55 + darkNeutral[index] * 0.45),
+    );
+
+    return `rgb(${darkened.join(', ')})`;
+};
+
+const overlapArea = (first: Rectangle, second: Rectangle) => {
+    const width = Math.max(0, Math.min(first.left + first.width, second.left + second.width) - Math.max(first.left, second.left));
+    const height = Math.max(0, Math.min(first.top + first.height, second.top + second.height) - Math.max(first.top, second.top));
+    return width * height;
+};
+
+const labelPositionCandidates = (x: number, y: number, width: number): LabelPlacement[] => {
+    const radius = PIN_RADIUS + LABEL_GAP + Math.max(width / 2, LABEL_HEIGHT / 2);
+    const rotation = 15 * Math.PI / 180;
+    const directions = Array.from({ length: 8 }, (_, index) => {
+        const angle = rotation + index * Math.PI / 4;
+        return { x: Math.cos(angle), y: Math.sin(angle) };
+    });
+
+    return directions.map(direction => ({
+        left: x + direction.x * radius - width / 2,
+        top: y + direction.y * radius - LABEL_HEIGHT / 2,
+    }));
+};
+
+const labelPlacements = (
+    markers: BuildingMarker[],
+    croppedTop: number,
+    croppedLeft: number,
+    scale: number,
+    containerWidth: number,
+    containerHeight: number,
+) => {
+    const pins = markers.map(marker => ({
+        marker,
+        x: (marker.left - croppedLeft) * 10 * scale,
+        y: (marker.top - croppedTop) * 10 * scale,
+    }));
+
+    // Lay out the most crowded pins first, while the most label positions are available.
+    const orderedPins = [...pins].sort((first, second) => {
+        const nearestDistance = (pin: typeof first) => Math.min(
+            ...pins
+                .filter(other => other.marker.code !== pin.marker.code)
+                .map(other => Math.hypot(pin.x - other.x, pin.y - other.y)),
+        );
+        return nearestDistance(first) - nearestDistance(second);
+    });
+
+    const placedLabels: Rectangle[] = [];
+    const placements = new Map<BuildingMarker['code'], LabelPlacement>();
+
+    orderedPins.forEach(({ marker, x, y }) => {
+        const width = labelWidth(marker.code);
+        const candidates = labelPositionCandidates(x, y, width);
+
+        const best = candidates.reduce((currentBest, candidate, preference) => {
+            const rectangle = { ...candidate, width, height: LABEL_HEIGHT };
+            const outsideWidth = Math.max(0, -rectangle.left) + Math.max(0, rectangle.left + width - containerWidth);
+            const outsideHeight = Math.max(0, -rectangle.top) + Math.max(0, rectangle.top + LABEL_HEIGHT - containerHeight);
+            const labelOverlap = placedLabels.reduce((sum, placed) => sum + overlapArea(rectangle, placed), 0);
+            const pinOverlap = pins.reduce((sum, pin) => sum + overlapArea(rectangle, {
+                left: pin.x - PIN_RADIUS,
+                top: pin.y - PIN_RADIUS,
+                width: PIN_RADIUS * 2,
+                height: PIN_RADIUS * 2,
+            }), 0);
+            const score = (outsideWidth + outsideHeight) * 1000 + labelOverlap * 100 + pinOverlap * 10 + preference;
+
+            return score < currentBest.score ? { rectangle, score } : currentBest;
+        }, { rectangle: { ...candidates[0], width, height: LABEL_HEIGHT }, score: Number.POSITIVE_INFINITY });
+
+        placedLabels.push(best.rectangle);
+        placements.set(marker.code, { left: best.rectangle.left - x, top: best.rectangle.top - y });
+    });
+
+    return placements;
+};
+
 export function DynamicMap({ buildingMarkers }: DynamicMapProps) {
     const {
         croppedTop,
@@ -77,6 +196,10 @@ export function DynamicMap({ buildingMarkers }: DynamicMapProps) {
     }, [buildingMarkers]);
 
     const containerHeight = 320;
+    const labels = useMemo(
+        () => labelPlacements(buildingMarkers, croppedTop, croppedLeft, scale, containerWidth, containerHeight),
+        [buildingMarkers, croppedTop, croppedLeft, scale, containerWidth],
+    );
     
     const termSeason = term();
 
@@ -108,22 +231,26 @@ export function DynamicMap({ buildingMarkers }: DynamicMapProps) {
             />
             {buildingMarkers.map((marker) => {
                 const adjustedTop = (marker.top - croppedTop) * 10 * scale;
-                const adjustLeft = (marker.left - croppedLeft) * 10 * scale;;
+                const adjustedLeft = (marker.left - croppedLeft) * 10 * scale;
+                const selectedLabel = labels.get(marker.code);
 
                 return (
-                    <div
-                        class="building-marker"
-                        style={{
-                            backgroundColor: marker.color,
-                            left: adjustLeft,
-                            top: adjustedTop,
-                        }}
-                        title={marker.code}
-                        key={marker.code}
-                    >
-                        <span
+                    <div class="building-marker-group" key={marker.code}>
+                        <div
+                            class="building-marker"
                             style={{
-                                color: marker.color,
+                                backgroundColor: marker.color,
+                                left: adjustedLeft,
+                                top: adjustedTop,
+                            }}
+                            title={marker.code}
+                        />
+                        <span
+                            class="building-label"
+                            style={{
+                                color: readableLabelColor(marker.color),
+                                left: adjustedLeft + (selectedLabel?.left ?? 0),
+                                top: adjustedTop + (selectedLabel?.top ?? 0),
                             }}
                         >
                             {marker.code.toLowerCase()}
